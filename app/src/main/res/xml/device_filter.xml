@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Official Arduino (Uno, Mega, Leonardo, etc.) -->
+    <usb-device vendor-id="9025" />   <!-- 0x2341 -->
+    <usb-device vendor-id="10755" />  <!-- 0x2A03 Arduino SA -->
+
+    <!-- CH340 / CH341 / CH9102 — most clone Arduinos, many ESP32/ESP8266 boards -->
+    <usb-device vendor-id="6790" />   <!-- 0x1A86 -->
+
+    <!-- FTDI — some Nano/older/Mega boards, many third-party dev boards -->
+    <usb-device vendor-id="1027" />   <!-- 0x0403 -->
+
+    <!-- Silicon Labs CP210x — most ESP32/ESP8266 dev boards (NodeMCU, DevKitC, etc.) -->
+    <usb-device vendor-id="4292" />   <!-- 0x10C4 -->
+
+    <!-- Prolific PL2303 — some older boards and adapters -->
+    <usb-device vendor-id="1659" />   <!-- 0x067B -->
+
+    <!-- STMicroelectronics — ST-Link, STM32 boards with built-in USB -->
+    <usb-device vendor-id="1155" />   <!-- 0x0483 -->
+
+    <!-- Espressif native USB — ESP32-S2, ESP32-S3, ESP32-C3 (no separate USB-serial chip) -->
+    <usb-device vendor-id="12346" />  <!-- 0x303A -->
+
+    <!-- Adafruit boards (Feather, various native-USB boards) -->
+    <usb-device vendor-id="9114" />   <!-- 0x239A -->
+
+    <!-- Raspberry Pi (Pico CDC, Pico W) -->
+    <usb-device vendor-id="11914" />  <!-- 0x2E8A -->
+
+    <!-- Teensy boards -->
+    <usb-device vendor-id="5824" />   <!-- 0x16C0 -->
+</resources>

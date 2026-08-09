@@ -1,0 +1,39 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace 'com.thameem.arduinoide'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.thameem.arduinoide"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+
+    // Handles CH340/CH341, FTDI, CP210x, PL2303, and CDC-ACM chips —
+    // covers Arduino Uno/Nano/Mega clones, ESP32, ESP8266, STM32, Pi Pico, etc.
+    // Same underlying approach ArduinoDroid uses. No Web Serial involved anywhere.
+    implementation 'com.github.mik3y:usb-serial-for-android:3.7.0'
+}
