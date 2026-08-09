@@ -1278,15 +1278,8 @@ function init() {
   renderLibList(LIBRARIES);
   renderExamples();
   log('info', '── Arduino Web IDE Ready ──');
-  log('info', 'Click Verify to compile your sketch via Arduino Cloud.');
-  log('info', 'Click Connect Port to connect your Arduino via Web Serial.');
-  log('warn', '⚠ Web Serial requires Chrome or Edge browser.');
-
-  if (!('serial' in navigator)) {
-    log('error', '✗ Web Serial API not supported in this browser. Use Chrome or Edge.');
-    document.getElementById('btn-connect').disabled = true;
-    document.getElementById('btn-connect').title = 'Web Serial not supported';
-  }
+  log('info', 'Click Verify to compile your sketch.');
+  log('info', 'Click Connect Port to connect your Arduino via USB.');
 }
 
 // ===================== SYNTAX HIGHLIGHTING =====================
@@ -1700,7 +1693,7 @@ function hexLineToBytes(line) {
 }
 
 async function performSimulatedUpload(board) {
-  log('info', 'Using Web Serial direct upload protocol...');
+  log('info', 'Using native USB upload protocol...');
   log('info', 'Resetting board via DTR toggle...');
   showProgress(15);
 
@@ -1734,15 +1727,6 @@ async function performSimulatedUpload(board) {
   await delay(1000);
   switchOutput('serial');
   serialLog(`[Connected to ${board.name} @ ${document.getElementById('baud-select').value} baud]`);
-}
-
-// ===================== WEB SERIAL =====================
-async function toggleSerial() {
-  if (state.connected) {
-    await disconnectSerial();
-  } else {
-    await connectSerial();
-  }
 }
 
 // ===================== NATIVE USB (Android) =====================
