@@ -1021,9 +1021,9 @@ const state = {
 // which is what caused it to get stuck in the wrong state before.
 function refreshUploadButton() {
   const btn = document.getElementById('btn-upload');
-  const shouldEnable = state.connected && state.compiled;
+  const shouldEnable = state.compiled;
   if (btn) btn.disabled = !shouldEnable;
-  log('info', `[debug] connected=${state.connected} compiled=${state.compiled} -> upload ${shouldEnable ? 'ENABLED' : 'disabled'}`);
+  log('info', `[debug] compiled=${state.compiled} -> upload ${shouldEnable ? 'ENABLED' : 'disabled'}`);
 }
 
 // ===================== DEFAULT CODE =====================
@@ -1607,12 +1607,13 @@ function parseCompileErrors(msg) {
 
 // ===================== UPLOAD =====================
 async function uploadCode() {
-  if (!state.connected) {
-    log('error', '✗ No port connected. Click "Connect Port" first.');
+  if (!state.compiled) {
+    log('warn', '⚠ Verify the code first before uploading.');
     return;
   }
-  if (!state.compiled) {
-    log('warn', '⚠ Compile first before uploading.');
+  if (!state.connected) {
+    log('error', '✗ Connect USB first.');
+    setStatus('Connect USB first');
     return;
   }
 
