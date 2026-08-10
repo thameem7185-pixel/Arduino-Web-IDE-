@@ -13,13 +13,7 @@ class SplashActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splash)
 
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, MainActivity::class.java)
-            // Pass through USB-attach info if the app was launched by plugging in a board
-            if (getIntent().action == "android.hardware.usb.action.USB_DEVICE_ATTACHED") {
-                intent.action = getIntent().action
-                intent.putExtras(getIntent())
-            }
-            startActivity(intent)
+            startActivity(Intent(this, MainActivity::class.java))
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
             finish()
         }, 1200)
