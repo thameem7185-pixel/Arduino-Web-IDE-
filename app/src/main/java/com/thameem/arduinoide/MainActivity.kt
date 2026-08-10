@@ -29,6 +29,8 @@ class MainActivity : AppCompatActivity(), SerialInputOutputManager.Listener {
     private var currentBaud = 9600
 
     private val ACTION_USB_PERMISSION = "com.thameem.arduinoide.USB_PERMISSION"
+    private var pageReady = false
+    private var pendingAttachedDevice: UsbDevice? = null
 
     private val usbReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -45,6 +47,19 @@ class MainActivity : AppCompatActivity(), SerialInputOutputManager.Listener {
         }
     }
 
+    // Fires when a board is plugged in while the app is already open (no page
+    // reload involved here, unlike the old manifest-level launch approach).
+    private val attachReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == UsbManager.ACTION_USB_DEVICE_ATTACHED) {
+                val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+                device?.let {
+                    if (pageReady) requestPermissionAndConnect(it) else pendingAttachedDevice = it
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
@@ -55,7 +70,18 @@ class MainActivity : AppCompatActivity(), SerialInputOutputManager.Listener {
 
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
-        webView.webViewClient = WebViewClient()
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                pageReady = true
+                // If a board was plugged in before the page finished loading,
+                // connect now that window.onUsbConnected actually exists.
+                pendingAttachedDevice?.let {
+                    requestPermissionAndConnect(it)
+                    pendingAttachedDevice = null
+                }
+            }
+        }
         webView.addJavascriptInterface(UsbBridge(), "AndroidUSB")
         webView.loadUrl("file:///android_asset/index.html")
 
@@ -66,10 +92,11 @@ class MainActivity : AppCompatActivity(), SerialInputOutputManager.Listener {
             registerReceiver(usbReceiver, filter)
         }
 
-        // If the app was launched because a board was just plugged in, connect right away
-        if (intent.action == UsbManager.ACTION_USB_DEVICE_ATTACHED) {
-            val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
-            device?.let { requestPermissionAndConnect(it) }
+        val attachFilter = IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(attachReceiver, attachFilter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(attachReceiver, attachFilter)
         }
     }
 
@@ -77,6 +104,7 @@ class MainActivity : AppCompatActivity(), SerialInputOutputManager.Listener {
         super.onDestroy()
         closeConnection()
         try { unregisterReceiver(usbReceiver) } catch (_: Exception) {}
+        try { unregisterReceiver(attachReceiver) } catch (_: Exception) {}
     }
 
     override fun onBackPressed() {
