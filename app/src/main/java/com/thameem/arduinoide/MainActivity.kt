@@ -183,8 +183,9 @@ class MainActivity : AppCompatActivity(), SerialInputOutputManager.Listener {
         } else {
             val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
                 PendingIntent.FLAG_MUTABLE else 0
+            val permissionIntent = Intent(ACTION_USB_PERMISSION).setPackage(packageName)
             val pendingIntent = PendingIntent.getBroadcast(
-                this, 0, Intent(ACTION_USB_PERMISSION), flags
+                this, 0, permissionIntent, flags
             )
             usbManager.requestPermission(device, pendingIntent)
         }
