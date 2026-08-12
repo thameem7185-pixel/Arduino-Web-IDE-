@@ -5,6 +5,9 @@ A native Android app that wraps a browser-based Arduino IDE, letting you write, 
 ## Why this exists
 
 Most Arduino development assumes you have a laptop or desktop. This project removes that assumption entirely: it's a phone-first Arduino IDE that talks to your board over USB OTG, so you can code, compile, and flash sketches using nothing but an Android device and a USB cable.
+<img width="1365" height="662" alt="image" src="https://github.com/user-attachments/assets/fb6d89b7-c2cf-4366-86ed-d0ec5983c663" />
+<img width="410" height="735" alt="image" src="https://github.com/user-attachments/assets/d6c4eae5-8ffb-47ef-b58d-323771d4f6ca" />
+
 
 ## Features
 
