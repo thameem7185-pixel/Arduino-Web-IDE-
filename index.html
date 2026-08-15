@@ -1806,25 +1806,76 @@ async function toggleSerial() {
   }
 }
 
+// ===================== WEB SERIAL FALLBACK (browser only) =====================
+let webSerialPort = null;
+let webSerialReader = null;
+let webSerialWriter = null;
+
 async function connectSerial() {
-  if (!('AndroidUSB' in window)) {
-    log('error', '✗ USB bridge not available. This build must run inside the Arduino Web IDE app.');
+  const baud = parseInt(document.getElementById('baud-select').value);
+
+  if ('AndroidUSB' in window) {
+    log('info', 'Looking for a connected board...');
+    window.AndroidUSB.requestConnection(baud);
     return;
   }
-  const baud = parseInt(document.getElementById('baud-select').value);
-  log('info', 'Looking for a connected board...');
-  window.AndroidUSB.requestConnection(baud);
+
+  if (!('serial' in navigator)) {
+    log('error', '✗ Web Serial not supported in this browser. Use desktop Chrome/Edge, or the Android app.');
+    return;
+  }
+
+  try {
+    webSerialPort = await navigator.serial.requestPort();
+    await webSerialPort.open({ baudRate: baud });
+    window.onUsbConnected();
+
+    const decoder = new TextDecoderStream();
+    webSerialPort.readable.pipeTo(decoder.writable);
+    webSerialReader = decoder.readable.getReader();
+    webSerialWriter = webSerialPort.writable.getWriter();
+
+    (async () => {
+      try {
+        while (true) {
+          const { value, done } = await webSerialReader.read();
+          if (done) break;
+          if (value) window.onUsbData(value);
+        }
+      } catch (e) {
+        log('error', `✗ ${e.message}`);
+      }
+    })();
+  } catch (e) {
+    log('error', `✗ ${e.message}`);
+  }
 }
 
 async function disconnectSerial() {
-  if ('AndroidUSB' in window) window.AndroidUSB.disconnect();
+  if ('AndroidUSB' in window) { window.AndroidUSB.disconnect(); return; }
+
+  try {
+    if (webSerialReader) { await webSerialReader.cancel(); webSerialReader = null; }
+    if (webSerialWriter) { webSerialWriter.releaseLock(); webSerialWriter = null; }
+    if (webSerialPort) { await webSerialPort.close(); webSerialPort = null; }
+  } catch (e) {
+    log('error', `✗ ${e.message}`);
+  }
+  window.onUsbDisconnected();
 }
 
 async function sendSerial() {
   const input = document.getElementById('serial-input');
   const text = input.value;
   if (!text || !state.connected) return;
-  window.AndroidUSB.write(text + '\n');
+
+  if ('AndroidUSB' in window) {
+    window.AndroidUSB.write(text + '\n');
+  } else if (webSerialWriter) {
+    await webSerialWriter.write(new TextEncoder().encode(text + '\n'));
+  } else {
+    return;
+  }
   serialLog(`> ${text}`, 'sent');
   input.value = '';
 }
