@@ -1527,20 +1527,6 @@ async function localSyntaxCheck(code, board) {
       if (ch === '(') parens++;
       if (ch === ')') parens--;
     }
-    // Basic checks
-    const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith('//') && !trimmed.startsWith('#') &&
-        !trimmed.startsWith('*') && !trimmed.endsWith('{') &&
-        !trimmed.endsWith('}') && !trimmed.endsWith(';') &&
-        !trimmed.endsWith(',') && !trimmed.endsWith('\\') &&
-        trimmed.includes('=') && !trimmed.includes('==') &&
-        !trimmed.startsWith('if') && !trimmed.startsWith('while') &&
-        !trimmed.startsWith('for')) {
-      // heuristic: assignment without semicolon
-      if (!lines[i].includes('//')) {
-        // probably fine, skip
-      }
-    }
   });
 
   if (braces !== 0) {
@@ -1550,9 +1536,9 @@ async function localSyntaxCheck(code, board) {
     errors.push(`Mismatched parentheses — check function calls`);
   }
 
-  // Check for setup/loop
-  const hasSetup = code.includes('void setup');
-  const hasLoop = code.includes('void loop');
+  // Check for setup/loop (tolerant of extra whitespace/newlines between tokens)
+  const hasSetup = /\bvoid\s+setup\s*\(/.test(code);
+  const hasLoop = /\bvoid\s+loop\s*\(/.test(code);
   if (!hasSetup) errors.push(`Missing required function: void setup()`);
   if (!hasLoop) errors.push(`Missing required function: void loop()`);
 
